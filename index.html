@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>SHALOM - Plateforme Chrétienne</title>
+    <meta name="description" content="La foi au quotidien, la paix dans le cœur. Compagnon chrétien personnel hors-ligne pour vos prières, témoignages, paroles audio/vidéo et rappels." />
+    <meta property="og:title" content="SHALOM - Compagnon Chrétien Personnel" />
+    <meta property="og:description" content="La foi au quotidien, la paix dans le cœur. Compagnon chrétien personnel hors-ligne pour vos prières, témoignages, paroles audio/vidéo et rappels." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./shalom_logo.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0f2b5c" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SHALOM" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.json" />
+  </head>
+  <body class="bg-slate-50 dark:bg-[#070e20] text-slate-900 dark:text-slate-100 min-h-screen antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        var isUnbuiltSource = !!document.querySelector('script[src="/src/main.tsx"]');
+        if (isUnbuiltSource && location.hostname.indexOf('github.io') !== -1) {
+          var baseDir = location.pathname.replace(/\/index\.html$/, '/');
+          if (!baseDir.endsWith('/')) baseDir += '/';
+          if (baseDir.indexOf('/docs/') === -1) {
+            fetch(baseDir + 'docs/index.html', { method: 'HEAD' })
+              .then(function (r) {
+                if (r.ok) {
+                  location.replace(baseDir + 'docs/');
+                }
+              })
+              .catch(function () {});
+          }
+        }
+        window.setTimeout(function () {
+          if (window.__SHALOM_BOOTED__) return;
+          var root = document.getElementById('root');
+          if (!root || root.childElementCount > 0) return;
+          root.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,sans-serif;background:#f8fafc;color:#0b1f42;text-align:center;">' +
+            '<div style="max-width:360px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 10px 25px rgba(11,31,66,0.08);">' +
+            '<h1 style="margin:0 0 8px;font-size:20px;font-weight:800;">SHALOM</h1>' +
+            '<p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#475569;">Le démarrage local prend plus de temps que prévu. Veuillez actualiser l’application.</p>' +
+            '<button id="shalom-recover-btn" type="button" style="background:#1d4ed8;color:#fff;border:0;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;">Actualiser la page</button>' +
+            '</div></div>';
+          var btn = document.getElementById('shalom-recover-btn');
+          if (btn) {
+            btn.onclick = function () {
+              location.reload();
+            };
+          }
+        }, 15000);
+      })();
+    </script>
+  </body>
+</html>
+

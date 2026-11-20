@@ -1,0 +1,11 @@
+{
+  "name": "Remix SHALOM - Remix",
+  "description": "La foi au quotidien, la paix dans la communion. Plateforme chrétienne complète pour la vie spirituelle personnelle et l\u0027organisation de l\u0027église.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
