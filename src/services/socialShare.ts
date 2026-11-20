@@ -146,7 +146,11 @@ export function buildGmailMailtoUrl(payload: SharePayload): string {
 }
 
 export function buildPlatformShareUrl(platform: Exclude<SocialPlatform, 'native'>, payload: SharePayload): string {
-  const shareUrl = payload.url || (typeof window !== 'undefined' ? window.location.origin : 'https://shalom.app');
+  const defaultShareUrl =
+    typeof window !== 'undefined' && window.location.protocol.startsWith('http')
+      ? `${window.location.origin}${window.location.pathname}`
+      : 'https://shalom.app';
+  const shareUrl = payload.url || defaultShareUrl;
   const encodedText = encodeURIComponent(payload.text);
   const encodedTitle = encodeURIComponent(payload.title || 'Partage SHALOM');
   const encodedUrl = encodeURIComponent(shareUrl);

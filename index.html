@@ -32,7 +32,7 @@
             fetch(baseDir + 'docs/index.html', { method: 'HEAD' })
               .then(function (r) {
                 if (r.ok) {
-                  location.replace(baseDir + 'docs/');
+                  location.replace(baseDir + 'docs/' + location.search + location.hash);
                 }
               })
               .catch(function () {});

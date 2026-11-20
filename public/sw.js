@@ -1,5 +1,5 @@
 // Service Worker for SHALOM - Offline Christian Companion (APK/Web/PWA compatible)
-const CACHE_NAME = 'shalom-cache-v13';
+const CACHE_NAME = 'shalom-cache-v14';
 const CORE_ASSETS = [
   './',
   './index.html',
