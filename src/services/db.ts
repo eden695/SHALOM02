@@ -71,7 +71,7 @@ class ShalomDB {
           this.dbPromise = null;
           reject(new Error('Délai dépassé lors de l’ouverture du stockage local.'));
         }
-      }, 3000);
+      }, 8000);
 
       let request: IDBOpenDBRequest;
       try {

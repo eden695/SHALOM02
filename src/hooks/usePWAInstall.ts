@@ -1,5 +1,6 @@
-// PWA Installation Hook following AI Studio PWA standards
+// PWA & Native Capacitor Installation Hook for SHALOM
 import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -7,12 +8,21 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function usePWAInstall() {
+  const isNativeApp = Capacitor.isNativePlatform();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(isNativeApp);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Detect standalone mode (already installed or running in WebView / APK)
+    // Inside native Capacitor APK/IPA, assets are bundled locally inside the app binary:
+    // skip Service Worker registration & browser PWA install banners.
+    if (isNativeApp) {
+      setIsInstalled(true);
+      setIsIOS(false);
+      return;
+    }
+
+    // Detect standalone mode (installed PWA)
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
@@ -36,7 +46,7 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Register service worker in HTTP/HTTPS production, skip on file:// / capacitor:// APK schemes
+    // Register service worker in HTTP/HTTPS web production (e.g., GitHub Pages)
     const isHttpOrigin =
       typeof window !== 'undefined' &&
       (window.location.protocol === 'https:' || window.location.protocol === 'http:');
@@ -99,10 +109,10 @@ export function usePWAInstall() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, []);
+  }, [isNativeApp]);
 
   const install = async () => {
-    if (!deferredPrompt) return false;
+    if (isNativeApp || !deferredPrompt) return false;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
@@ -114,7 +124,8 @@ export function usePWAInstall() {
   };
 
   return {
-    isInstallable: !!deferredPrompt,
+    isNativeApp,
+    isInstallable: !isNativeApp && !!deferredPrompt,
     isInstalled,
     isIOS,
     install,

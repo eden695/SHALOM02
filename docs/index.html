@@ -18,8 +18,8 @@
     <link rel="icon" type="image/png" sizes="192x192" href="./pwa-192x192.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
-    <script type="module" crossorigin src="./assets/index-ixu4MULH.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-D99eE14q.css">
+    <script type="module" crossorigin src="./assets/index-Q76wSSYX.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CHvJ3GV_.css">
   </head>
   <body class="bg-slate-50 dark:bg-[#070e20] text-slate-900 dark:text-slate-100 min-h-screen antialiased">
     <div id="root"></div>
@@ -33,7 +33,7 @@
             fetch(baseDir + 'docs/index.html', { method: 'HEAD' })
               .then(function (r) {
                 if (r.ok) {
-                  location.replace(baseDir + 'docs/');
+                  location.replace(baseDir + 'docs/' + location.search + location.hash);
                 }
               })
               .catch(function () {});

@@ -97,7 +97,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
   const { userProfile, reloadData } = useShalomDB();
   const { lang, setLang, t, currentLanguageInfo } = useLanguage();
   const isOnline = useOnlineStatus();
-  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const { isNativeApp, isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [subTab, setSubTab] = useModuleSubView<string>('settings', initialSubTab || 'general');
 
   const [langSearch, setLangSearch] = useState('');
@@ -1729,19 +1729,27 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                   <Smartphone className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5" />
                   <div>
                     <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
-                      Installation & Utilisation hors ligne (PWA)
+                      {isNativeApp
+                        ? 'Application Android autonome (ressources locales intégrées)'
+                        : 'Installation & Utilisation hors ligne (PWA)'}
                     </span>
                     <span className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed block mt-0.5">
-                      {isInstalled
-                        ? 'SHALOM est installée sur cet appareil. Toutes vos données (prières, studios, coffre, contacts) fonctionnent sans connexion Internet.'
-                        : isIOS
-                          ? 'Sur iPhone / iPad (Safari) : touchez Partager puis « Sur l’écran d’accueil » pour utiliser SHALOM hors ligne.'
-                          : 'Installez SHALOM sur l’écran d’accueil Android ou ordinateur pour la lancer à tout moment, même en mode avion.'}
+                      {isNativeApp
+                        ? 'Tous les écrans et fichiers de SHALOM sont embarqués directement dans l’APK. Vous pouvez ouvrir et utiliser l’application dès le premier lancement en mode avion.'
+                        : isInstalled
+                          ? 'SHALOM est installée sur cet appareil. Toutes vos données (prières, studios, coffre, contacts) fonctionnent sans connexion Internet.'
+                          : isIOS
+                            ? 'Sur iPhone / iPad (Safari) : touchez Partager puis « Sur l’écran d’accueil » pour utiliser SHALOM hors ligne.'
+                            : 'Installez SHALOM sur l’écran d’accueil Android ou ordinateur pour la lancer à tout moment, même en mode avion.'}
                     </span>
                   </div>
                 </div>
 
-                {isInstalled ? (
+                {isNativeApp ? (
+                  <span className="px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold shrink-0">
+                    APK hors ligne prêt
+                  </span>
+                ) : isInstalled ? (
                   <span className="px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold shrink-0">
                     Installée · Mode autonome prêt
                   </span>
