@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, X } from 'lucide-react';
+import { Bell, X, WifiOff } from 'lucide-react';
 import { useShalomDB } from './hooks/useShalomDB';
+import { useOnlineStatus } from './services/connectivity';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { RecordingProvider, useGlobalRecording } from './contexts/RecordingContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -63,6 +64,7 @@ function ShalomAppShell({
   setIsLaunchLockOpen,
 }: ShellProps) {
   const { userProfile, loading } = useShalomDB();
+  const isOnline = useOnlineStatus();
   const { t, lang } = useLanguage();
   const isEn = lang === 'en';
   const { activeTab, canGoBack, navigateTo, goBack, goHome } = useNavigation();
@@ -238,6 +240,19 @@ function ShalomAppShell({
           onGoBack={goBack}
           onGoHome={goHome}
         />
+
+        {!isOnline && (
+          <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-3">
+            <div className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex items-center gap-2 text-xs font-medium">
+              <WifiOff className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>
+                {isEn
+                  ? 'Offline mode — All local tools, studios, vault, and saved data remain available.'
+                  : 'Mode hors ligne — Toutes les fonctions locales, studios, coffre et données enregistrées restent disponibles.'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {activeReminderBanner && (
           <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-3">

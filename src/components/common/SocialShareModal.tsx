@@ -8,8 +8,10 @@ import {
   Smartphone,
   MessageCircle,
   Mail,
+  WifiOff,
 } from 'lucide-react';
 import { Modal } from './Modal';
+import { useOnlineStatus } from '../../services/connectivity';
 import {
   SharePayload,
   tryNativeShare,
@@ -39,6 +41,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({
   onClose,
   payload,
 }) => {
+  const isOnline = useOnlineStatus();
   const [notice, setNotice] = useState<string | null>(null);
   const [fallbackLink, setFallbackLink] = useState<{
     label: string;
@@ -117,6 +120,26 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({
     setFallbackLink(null);
     try {
       await copyTextQuietly(payload.text);
+
+      if (!isOnline) {
+        if (payload.file) {
+          triggerFileDownload(payload.file, payload.file.name);
+        }
+        setNotice(
+          platform === 'gmail'
+            ? 'Connexion Internet requise pour ouvrir Gmail Web. Le texte a été copié et vous pouvez préparer un brouillon via l’application e-mail locale ci-dessous.'
+            : `Connexion Internet requise pour partager sur ${label}. Le texte a été copié localement pour être envoyé dès le retour de la connexion.`
+        );
+        if (platform === 'gmail') {
+          setFallbackLink({
+            label: 'Gmail Web (nécessite Internet)',
+            url: buildPlatformShareUrl('gmail', payload),
+            secondaryLabel: 'Application E-mail locale',
+            secondaryUrl: buildGmailMailtoUrl(payload),
+          });
+        }
+        return;
+      }
 
       // For Gmail directly clicked by user, prefer native share sheet when file attached,
       // or offer both direct Gmail app/mailto AND Gmail Web compose link
@@ -228,6 +251,14 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({
       maxWidth="md"
     >
       <div className="space-y-4 text-xs">
+        {!isOnline && (
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 flex items-start gap-2">
+            <WifiOff className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <span>
+              Vous êtes hors ligne : les services web (Gmail Web, WhatsApp, réseaux sociaux) demandent une connexion Internet, mais vous pouvez copier le texte ou télécharger le média localement.
+            </span>
+          </div>
+        )}
         {previewUrl && (
           <div className="rounded-xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-slate-800 p-2">
             {isImage && (

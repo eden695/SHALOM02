@@ -1,6 +1,5 @@
-// PWA & Native Capacitor Installation Hook for SHALOM
+// PWA Installation & Service Worker Registration Hook for SHALOM
 import { useEffect, useState } from 'react';
-import { Capacitor } from '@capacitor/core';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -8,21 +7,12 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function usePWAInstall() {
-  const isNativeApp = Capacitor.isNativePlatform();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(isNativeApp);
+  const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Inside native Capacitor APK/IPA, assets are bundled locally inside the app binary:
-    // skip Service Worker registration & browser PWA install banners.
-    if (isNativeApp) {
-      setIsInstalled(true);
-      setIsIOS(false);
-      return;
-    }
-
-    // Detect standalone mode (installed PWA)
+    // Detect standalone mode (installed PWA or WebView shell)
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
@@ -46,7 +36,7 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Register service worker in HTTP/HTTPS web production (e.g., GitHub Pages)
+    // Register Service Worker on HTTP/HTTPS origins (GitHub Pages, web browsers, WebView)
     const isHttpOrigin =
       typeof window !== 'undefined' &&
       (window.location.protocol === 'https:' || window.location.protocol === 'http:');
@@ -58,7 +48,8 @@ export function usePWAInstall() {
           .getRegistrations()
           .then((regs) => {
             regs.forEach((reg) => {
-              const scriptUrl = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL;
+              const scriptUrl =
+                reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL;
               if (scriptUrl && scriptUrl !== expectedSwUrl) {
                 reg.unregister().catch(() => {});
               }
@@ -66,19 +57,7 @@ export function usePWAInstall() {
           })
           .catch(() => {});
 
-        const hadController = Boolean(navigator.serviceWorker.controller);
-        const onControllerChange = () => {
-          if (!hadController || !navigator.onLine) return;
-          try {
-            if (sessionStorage.getItem('shalom_sw_reloaded_v12')) return;
-            sessionStorage.setItem('shalom_sw_reloaded_v12', '1');
-          } catch {
-            // ignore storage restriction
-          }
-          window.location.reload();
-        };
-        navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
-
+        // Activate updated service worker gracefully on next open/manual refresh without forced mid-session reload
         navigator.serviceWorker
           .register('./sw.js', { updateViaCache: 'none' })
           .then((reg) => {
@@ -87,12 +66,6 @@ export function usePWAInstall() {
             }
           })
           .catch(() => {});
-
-        return () => {
-          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-          window.removeEventListener('appinstalled', handleAppInstalled);
-          navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
-        };
       } else {
         navigator.serviceWorker.getRegistrations().then((regs) => {
           regs.forEach((reg) => reg.unregister());
@@ -109,10 +82,10 @@ export function usePWAInstall() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [isNativeApp]);
+  }, []);
 
   const install = async () => {
-    if (isNativeApp || !deferredPrompt) return false;
+    if (!deferredPrompt) return false;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
@@ -124,8 +97,7 @@ export function usePWAInstall() {
   };
 
   return {
-    isNativeApp,
-    isInstallable: !isNativeApp && !!deferredPrompt,
+    isInstallable: !!deferredPrompt,
     isInstalled,
     isIOS,
     install,

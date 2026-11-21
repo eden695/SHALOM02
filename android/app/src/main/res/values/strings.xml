@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">SHALOM</string>
-    <string name="title_activity_main">SHALOM</string>
-    <string name="package_name">app.shalom.companion</string>
-    <string name="custom_url_scheme">app.shalom.companion</string>
-</resources>
